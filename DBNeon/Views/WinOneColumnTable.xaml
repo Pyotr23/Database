@@ -1,0 +1,27 @@
+﻿<Window x:Class="_5_DBNeon.WinOneColumnTable"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:_5_DBNeon"
+        mc:Ignorable="d"
+        Title="WinOneColumnTable" Height="300" Width="230">
+    <DockPanel LastChildFill="True">
+        <ToolBar DockPanel.Dock="Top">
+            <Button Content="Добавить" Command="{Binding AddCommand}" Width="60"/>
+            <Separator/>
+            <Button Content="Изменить" Command="{Binding EditCommand}" Width="60"
+                    CommandParameter="{Binding ElementName=listItems, Path=SelectedItem}"/>
+            <Separator/>
+            <Button Content="Удалить" Command="{Binding DeleteCommand}" Width="60"
+                    CommandParameter="{Binding ElementName=listItems, Path=SelectedItem}"/>
+        </ToolBar>
+        <ListBox Name="listItems" ItemsSource="{Binding ItemsCollection}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Name}" FontSize="16"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+</Window>

@@ -1,0 +1,140 @@
+﻿<Window x:Class="DBNeon.Views.WinBlocks"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DBNeon.Views"
+        mc:Ignorable="d"
+        Title="Список блоков" Height="300" SizeToContent="Width" ResizeMode="NoResize">
+    <Window.Resources>
+        <Style TargetType="{x:Type DataGridColumnHeader}">
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontFamily" Value="Segoe script"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>        
+        <local:ConverterDescriptionToColor x:Key="Color"/>        
+        <local:ConverterTwoComboboxToEnable x:Key="FromTwoComboboxes"/>
+        <local:ConverterId x:Key="GetName"/>        
+    </Window.Resources>
+    <DockPanel LastChildFill="True">
+        
+        <ToolBar DockPanel.Dock="Top">
+            <Button Content="Добавить" Command="{Binding AddCommand}"/>
+            <Separator/>
+            <Button Content="Изменить" Command="{Binding EditCommand}"/>
+            <Separator/>
+            <Button Content="Удалить" Command="{Binding DelCommand}"/>
+            <Separator/>            
+            <TextBlock Text="Выборка по:" FontWeight="Bold" VerticalAlignment="Center" Margin="5,0,5,0"/>
+            <ComboBox Name="cmbProperty" Width="75" ItemsSource="{Binding Selection}" SelectedItem="{Binding SelectionValue}"/>
+            
+            <TextBlock Text="Значение выборки:" FontWeight="Bold" VerticalAlignment="Center" Margin="5,0,5,0"/>
+            <ComboBox Name="cmbSearch" Width="100" IsEditable="True" SelectedItem="{Binding SelectCondition}">
+                <ComboBox.Style>
+                    <Style TargetType="ComboBox">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=cmbProperty, Path=SelectedItem}" Value="номеру">
+                                <Setter Property="ItemsSource" Value="{Binding Blocks}"/>
+                                <Setter Property="DisplayMemberPath" Value="Number"/>                                
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ElementName=cmbProperty, Path=SelectedItem}" Value="типу">
+                                <Setter Property="ItemsSource" Value="{Binding Types}"/>
+                                <Setter Property="DisplayMemberPath" Value="Name"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ElementName=cmbProperty, Path=SelectedItem}" Value="месту">
+                                <Setter Property="ItemsSource" Value="{Binding Places}"/>
+                                <Setter Property="DisplayMemberPath" Value="Name"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ElementName=cmbProperty, Path=SelectedItem}" Value="владельцу">
+                                <Setter Property="ItemsSource" Value="{Binding Places}"/>
+                                <Setter Property="DisplayMemberPath" Value="Name"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ElementName=cmbProperty, Path=SelectedItem}" Value="поставке">
+                                <Setter Property="ItemsSource" Value="{Binding Procurements}"/>
+                                <Setter Property="DisplayMemberPath" Value="Name"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ComboBox.Style>
+            </ComboBox>
+            
+            <CheckBox IsChecked="{Binding IsMainBlocks}" Content="Все" BorderThickness="1">
+                <!--<CheckBox.IsEnabled>
+                    <MultiBinding Converter="{StaticResource FromTwoComboboxes}">
+                        <Binding ElementName="cmbProperty" Path="SelectedItem"/>
+                        <Binding ElementName="cmbSearch" Path="SelectedItem"/>
+                    </MultiBinding>
+                </CheckBox.IsEnabled>-->
+                <CheckBox.Style>
+                    <Style TargetType="CheckBox">                        
+                        <Style.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </CheckBox.Style>
+            </CheckBox>
+            <Separator/>
+            
+            <Button Content="В Excel" Width="45" Background="MediumTurquoise"  Margin="5,0,5,0" Command="{Binding ExcelCommand}"/>
+        </ToolBar>
+        
+        <DataGrid Name="dtgBlocks" AutoGenerateColumns="False" RowHeaderWidth="0" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Visible" CanUserAddRows="False" 
+                  SelectedItem="{Binding SelectedBlock}">
+            <DataGrid.RowDetailsTemplate>
+                <DataTemplate>
+                    <TextBlock Name="txtDescription"  Text="{Binding Description}" Background="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Text, Converter={StaticResource Color}}"/>
+                </DataTemplate>
+            </DataGrid.RowDetailsTemplate>
+            <DataGrid.Style>
+                <Style TargetType="DataGrid">
+                    <Setter Property="ItemsSource" Value="{Binding ResultSearch}"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=cmbSearch, Path=SelectedIndex}" Value="-1">
+                            <Setter Property="ItemsSource" Value="{Binding Blocks}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Style>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Зав. номер" Width="90" Binding="{Binding Number}"/>
+                <DataGridTextColumn Header="Тип" Width="55" IsReadOnly="True">
+                    <DataGridTextColumn.Binding>
+                        <MultiBinding Converter="{StaticResource GetName}">
+                            <Binding Path="TypeId"/>
+                            <Binding Path="DataContext.Types" RelativeSource="{RelativeSource AncestorType=Window}"/>
+                        </MultiBinding>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Местоположение" Width="150" IsReadOnly="True">
+                    <DataGridTextColumn.Binding>
+                        <MultiBinding Converter="{StaticResource GetName}">
+                            <Binding Path="PlaceId"/>
+                            <Binding Path="DataContext.Places" RelativeSource="{RelativeSource AncestorType=Window}"/>
+                        </MultiBinding>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Дата" Width="95" Binding="{Binding Path=Date}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Владелец" Width="150" IsReadOnly="True">
+                    <DataGridTextColumn.Binding>
+                        <MultiBinding Converter="{StaticResource GetName}">
+                            <Binding Path="OwnerId"/>
+                            <Binding Path="DataContext.Places" RelativeSource="{RelativeSource AncestorType=Window}"/>
+                        </MultiBinding>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Поставка" Width="85" IsReadOnly="True">
+                    <DataGridTextColumn.Binding>
+                        <MultiBinding Converter="{StaticResource GetName}">
+                            <Binding Path="ProcurementId"/>
+                            <Binding Path="DataContext.Procurements" RelativeSource="{RelativeSource AncestorType=Window}"/>
+                        </MultiBinding>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
+                <DataGridCheckBoxColumn Header="Списан?" Width="Auto" Binding="{Binding Decommissioned}" IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</Window>
